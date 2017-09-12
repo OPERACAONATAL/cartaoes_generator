@@ -1,0 +1,28 @@
+{
+  "name": "qr_code_generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "jimp": "^0.2.28",
+    "pdfkit": "^0.8.3",
+    "pdfmake": "^0.1.32",
+    "qr-image": "^3.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "nodemon main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fazendaaa/qr_code_generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fazendaaa/qr_code_generator/issues"
+  },
+  "homepage": "https://github.com/Fazendaaa/qr_code_generator#readme"
+}
