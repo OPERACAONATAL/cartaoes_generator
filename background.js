@@ -1,9 +1,5 @@
-const qr = require('qr-image');
 const Jimp = require('jimp');
 const fs = require('fs');
-const pdfmake = require('pdfmake');
-const pdfkit = require('pdfkit');
-const csvdata = require('csvdata');
 
 const default_cb = (err, res) => {
     if (err)
@@ -75,11 +71,11 @@ const background = new Promise((resolve, reject) => {
                     .print(font, third_col, third_row, 'Sabonete')
                     .print(font, third_col, fourth_row, 'Escova de dente')
                     .print(font, third_col, fifth_row, 'Creme dental')
-                    .print(font, first_col, seventh_row, 'Locais: CAEP UFSCAR ou CAASO - USP dias 26/10 e 27/10')
+                    .print(font, first_col, seventh_row, 'Locais: CAEP UFSCAR ou CAASO - USP nos dias 25, 26, 27, 30 e 31/10')
                     .print(font, first_col, eighth_row, 'Horários: 12h às 14h')
                     .print(font, first_col, nineth_row, 'Responsável do projeto: ')
                     .print(font, first_col, tenth_row, 'Telefone: ')
-                    .print(font, first_col, eleventh_row, '1. Todos os itends devem ser novos;')
+                    .print(font, first_col, eleventh_row, '1. Todos os itens devem ser novos;')
                     .print(font, first_col, twelfth_row, '2. Devolva este cartão no local e datas estipulados; ')
                     .print(font, first_col, thirteenth_row, '3. Não é necessário embalar para presente;')
                     .print(font, first_col, fourteenth_row, '4. Caso seja colocado uma quantidade maior de algum item, ele poderá ser')
