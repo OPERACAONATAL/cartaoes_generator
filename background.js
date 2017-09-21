@@ -65,7 +65,7 @@ const background = new Promise((resolve, reject) => {
             return Jimp.loadFont(font_regular).then(font => {
                 return image.print(font, 290, first_row, 'Nome:')
                             .print(font, 290, second_row, 'Sexo:')
-                            .print(font, third_col, second_row, 'Idade:')
+                            .print(font, 700, second_row, 'Idade:')
                             .print(font, first_col, third_row, 'Calça:')
                             .print(font, first_col, fourth_row, 'Camiseta:')
                             .print(font, first_col, fifth_row, 'Sapato:')
