@@ -55,7 +55,7 @@ const background = new Promise((resolve, reject) => {
             return image.composite(line, 0, 290)
                 .composite(line, 0, sixth_row + font_size + 5)
                 .composite(line, 0, tenth_row + font_size + 5)
-                .composite(line, 0, fifteenth_row + 80)
+                .composite(line, 0, fifteenth_row + 100)
                 .composite(line, 0, 0)
                 .composite(line, 0, height - 1)
                 .composite(column, 0, 0)
@@ -84,7 +84,8 @@ const background = new Promise((resolve, reject) => {
                     .print(font, first_col, twelfth_row, '2. Devolva este cartão no local e datas estipulados; ')
                     .print(font, first_col, thirteenth_row, '3. Não é necessário embalar para presente;')
                     .print(font, first_col, fourteenth_row, '4. Caso seja colocado uma quantidade maior de algum item, ele poderá ser')
-                    .print(font, 65, fifteenth_row, 'realocado para outras sacolinhas');
+                    .print(font, 65, fifteenth_row, 'realocado para outras sacolinhas')
+                    .print(font, 235, fifteenth_row+1.5*font_size, 'A Operação Natal agradeçe a sua participação :)')
             })
             /*  Adiciona o texto em negrito */
         }).then(image => {
