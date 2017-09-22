@@ -12,7 +12,7 @@ import pandas as pd
 import copy as cp
 from tqdm import tqdm
 from PIL import Image
-from pdfrw import PdfReader, PdfWriter
+from fpdf import FPDF
 import os
 import math
 import re
@@ -22,19 +22,23 @@ background = cv2.imread('./dist/img/background.png')
 color = 0
 font = cv2.FONT_HERSHEY_TRIPLEX
 scale = 1
-x_offset = 25
+x_offset = 5
 y_offset = 5
 thick = 2
-crop = 30
+crop = 20
 elders = ['Cantinho Fraterno ', 'Helena Dornfeld']
 # Feio mas 'funciona'
 text = ['MESES', 'ANOS', 'ANO', 'MÊS']
-exceptions = ['Cantinho Fraterno ',
-              'CEMEI Papa João Paulo II', 'ONG Formiga Verde', 'Salesianos']
+exceptions = ['Cantinho Fraterno ', 'CEMEI Papa João Paulo II', 'ONG Formiga Verde', 'Salesianos']
+
+pdf = FPDF(unit="mm", format='A4')
+
+a4_width = 595
+a4_heigth = 842
 
 df = pd.read_csv('./src/data/data.csv')
 length = df.shape[0]
-# length = 15
+#length = 15
 
 def removeAccent(src):
     # Por algum motivo em alguns casos em específico há geração de '?' nas strings, por isso o strip
@@ -57,11 +61,9 @@ def insertData(id, data):
     institution = removeAccent(data['Nome da Instituição'])
     # 'Oito' é um constante encontrada empiricamente para converter em uma escala o tamanho da letra
     middle = int(len(institution)/2)*8
-    cv2.putText(new_background, institution, (600-middle, 140), font, scale, color, thickness=thick)
-
     cv2.putText(new_background, removeAccent(data['Nome do Assistido']), (400, 230), font, scale, color, thickness=thick)
     cv2.putText(new_background, removeAccent(data['Sexo']), (380, 260), font, scale, color, thickness=thick)
-    cv2.putText(new_background, f"ID:{id}", (30, 280), font, scale+1, color, thickness=thick)
+    cv2.putText(new_background, f"ID:{id}", (25, 280), font, 1.5, color, thickness=thick)
     cv2.putText(new_background, removeAccent(data['Idade']), (795, 260), font, scale, color, thickness=thick)
 
     cv2.putText(new_background, removeAccent(data['Nº Calça']), (130, 360), font, scale, color, thickness=thick)
@@ -81,20 +83,18 @@ def insertData(id, data):
     # Caso que sobrou: pessoas que não são da ACORDE, nem idosas e tem mais de 12 anos.
     else:
         cv2.putText(new_background, "Livro", (30, 455), font, scale, color, thickness=thick)
-
     # Salva a imagem do cartão
     cv2.imwrite(f"./dist/img/card/OPN-{i}.png", new_background)
 
 def exportToPDF(start, fileNames):
     images = [Image.open(f"./dist/img/card/{x}") for x in fileNames]
 
-    width = images[0].size[0]
-    height = images[0].size[1]
+    width, heigth = images[0].size
     # Duas colunas e três linhas
     page_width = 2 * width
-    page_height = 3 * height
+    page_heigth = 3 * heigth
 
-    page_img = Image.new('RGB', (page_width, page_height))
+    page_img = Image.new('RGB', (page_width, page_heigth), (255, 255, 255))
     x_offset = 0
     y_offset = 0
 
@@ -107,12 +107,13 @@ def exportToPDF(start, fileNames):
                 x_offset += width
                 k += 1
         x_offset = 0
-        y_offset += height
+        y_offset += heigth
 
-    a4_width = 595
-    a4_heigth = 842
+    # Verificar como transformar em um buffer
     page_img = page_img.resize((a4_width, a4_heigth), Image.ANTIALIAS)
-    page_img.save(f"./dist/pdf/page{i}.pdf", "PDF", resolution=100.0)
+    page_img.save('./dist/img/page.png', 'PNG', quality=100)
+    pdf.add_page()
+    pdf.image('./dist/img/page.png', x=2, y=2)
 
 def atoi(text):
     return int(text)
@@ -121,11 +122,11 @@ def atoi(text):
 def natural_keys(text):
     return atoi(re.split('(\d+)', text)[1])
 
-# print("\nCriando cartões:\n")
-# for i in tqdm(range(0, length)):
-#     # Como algumas instituições não entregaram seus dados a tempo, por ora não geraremos cartões delas -- mas é importante que seu id se mantenha
-#     if not df.ix[i]['Nome da Instituição'] in exceptions:
-#         insertData(i, df.ix[i])
+print("\nCriando cartões:\n")
+for i in tqdm(range(0, length)):
+# Como algumas instituições não entregaram seus dados a tempo, por ora não geraremos cartões delas -- mas é importante que seu id se mantenha
+    if not df.ix[i]['Nome da Instituição'] in exceptions:
+         insertData(i, df.ix[i])
 
 # Precisa ser altamente melhorado isso daqui, mas infelizmente as bibliotecas de pdf que encontrei não facilitam muito o serviço
 # Ao mesmo tempo a complexidade dessa parte do código é 200% desnecessaria
@@ -140,16 +141,5 @@ images = [f"{x}.png" for x in images]
 # O step no range é de seis porque é o número de cartões por página
 for i in tqdm(range(6, len(images), 6)):
     exportToPDF(i, images[i-6:i])
-
-# # # Mais um trecho de código que dói ver
-print('\nLinkando os cartões em um único pdf:\n')
-pdfPath = './dist/pdf/'
-writer = PdfWriter()
-files = [x for x in os.listdir(pdfPath) if x.endswith('.pdf')]
-files = [x.split('.')[0] for x in files]
-files = sorted(files, key=natural_keys)
-files = [f"{x}.pdf" for x in files]
-for fname in tqdm(files):
-    writer.addpages(PdfReader(os.path.join(pdfPath, fname)).pages)
-writer.write("cartoes.pdf")
-print("\n")
+pdf.output('cartoes.pdf', "F")
+print('\n')
