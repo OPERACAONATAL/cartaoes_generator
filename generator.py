@@ -111,8 +111,8 @@ def exportToPDF(start, fileNames):
         y_offset += heigth
 
     # Verificar como transformar em um buffer
-    page_img = page_img.resize((a4_width, a4_heigth), Image.ANTIALIAS)
-    page_img.save(f"./dist/img/page/page{start}.png", 'PNG', quality=100, dpi=(300, 300))
+    #page_img = page_img.resize((a4_width, a4_heigth), Image.ANTIALIAS)
+    page_img.save(f"./dist/img/page/page-{start}.png", 'PNG', quality=100, dpi=(300, 300))
     
 def atoi(text):
     return int(text)
@@ -148,7 +148,8 @@ print("\nLinkando as páginas em pdf:\n")
 for i in tqdm(range(6, len(images), 6)):
     pdf.add_page()
     # coloquei um x=2, y=2 porque a impressora do ICMC 'comia' um pouco da arte na hora de imprimir
-    pdf.image(f"./dist/img/page/page{i}.png", x=2, y=2)
+    pdf.image(f"./dist/img/page/page-{i}.png", x=2, y=2)
 
+print('\nSalvando pdf...\n')
 pdf.output('cartoes.pdf', 'F')
-print('\n')
+print('Programa finalizado\n')
