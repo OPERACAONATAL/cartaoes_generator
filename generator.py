@@ -40,8 +40,8 @@ df = pd.read_csv('./src/data/data.csv')
 length = df.shape[0]
 
 def removeAccent(src):
-    # Por algum motivo em alguns casos em específico há geração de '?' nas strings, por isso o strip
-    return unidecode.unidecode(str(src)).strip('?')
+    # Por algum motivo em alguns casos em específico há geração de '?' nas strings, por isso o replace
+    return unidecode.unidecode(str(src)).replace('?', '')
 
 def insertData(id, data):
     # Sei que isso é feio, mas não sei como salvar o qr em um buffer pro opencv ler
@@ -60,12 +60,12 @@ def insertData(id, data):
     institution = removeAccent(data['Nome da Instituição'])
     # 'Oito' é um constante encontrada empiricamente para converter em uma escala o tamanho da letra
     middle = int(len(institution)/2)*6
+
     cv2.putText(new_background, institution, (550-middle, 130), font, scale, color, thickness=thick)
     cv2.putText(new_background, removeAccent(data['Nome do Assistido']), (400, 230), font, scale, color, thickness=thick)
     cv2.putText(new_background, removeAccent(data['Sexo']), (380, 260), font, scale, color, thickness=thick)
-    cv2.putText(new_background, f"ID:{id}",
-                (25, 280), font, 1.5, color, thickness=thick)
     cv2.putText(new_background, removeAccent(data['Idade']), (795, 260), font, scale, color, thickness=thick)
+    cv2.putText(new_background, f"ID:{id}", (25, 280), font, 1.5, color, thickness=thick)
 
     cv2.putText(new_background, removeAccent(data['Nº Calça']), (130, 360), font, scale, color, thickness=thick)
     cv2.putText(new_background, removeAccent(data['Nº Camiseta']), (180, 390), font, scale, color, thickness=thick)
@@ -112,7 +112,7 @@ def exportToPDF(start, fileNames):
 
     # Verificar como transformar em um buffer
     page_img = page_img.resize((a4_width, a4_heigth), Image.ANTIALIAS)
-    page_img.save(f"./dist/img/page/page{start}.png", 'PNG', quality=100)
+    page_img.save(f"./dist/img/page/page{start}.png", 'PNG', quality=100, dpi=(300, 300))
     
 def atoi(text):
     return int(text)
@@ -123,11 +123,13 @@ def natural_keys(text):
 
 print("\nCriando cartões:\n")
 for i in tqdm(range(0, length)):
-# Como algumas instituições não entregaram seus dados a tempo, por ora não geraremos cartões delas -- mas é importante que seu id se mantenha
+# Como algumas instituições não entregaram seus dados a tempo, por ora não geraremos cartões delas -- mas é importante
+# que seu id se mantenha
     if not df.ix[i]['Nome da Instituição'] in exceptions:
          insertData(i, df.ix[i])
 
-# Precisa ser altamente melhorado isso daqui, mas infelizmente as bibliotecas de pdf que encontrei não facilitam muito o serviço
+# Precisa ser altamente melhorado isso daqui, mas infelizmente as bibliotecas de pdf que encontrei não facilitam muito
+# o serviço
 # Ao mesmo tempo a complexidade dessa parte do código é 200% desnecessaria
 print("\nExportando em páginas:\n")
 imgPath = './dist/img/card/'
@@ -145,7 +147,8 @@ print("\nLinkando as páginas em pdf:\n")
 # O step no range é de seis porque é o número de cartões por página
 for i in tqdm(range(6, len(images), 6)):
     pdf.add_page()
+    # coloquei um x=2, y=2 porque a impressora do ICMC 'comia' um pouco da arte na hora de imprimir
     pdf.image(f"./dist/img/page/page{i}.png", x=2, y=2)
 
-pdf.output('cartoes.pdf', "F")
+pdf.output('cartoes.pdf', 'F')
 print('\n')

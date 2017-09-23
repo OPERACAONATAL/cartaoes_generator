@@ -85,7 +85,7 @@ const background = new Promise((resolve, reject) => {
                     .print(font, first_col, thirteenth_row, '3. Não é necessário embalar para presente;')
                     .print(font, first_col, fourteenth_row, '4. Caso seja colocado uma quantidade maior de algum item, ele poderá ser')
                     .print(font, 65, fifteenth_row, 'realocado para outras sacolinhas')
-                    .print(font, 235, fifteenth_row+1.5*font_size, 'A Operação Natal agradeçe a sua participação :)')
+                    .print(font, 235, fifteenth_row+1.5*font_size, 'A Operação Natal agradece a sua participação :)')
             })
             /*  Adiciona o texto em negrito */
         }).then(image => {
