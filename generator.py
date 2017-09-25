@@ -16,6 +16,7 @@ import os
 import math
 import re
 import unidecode
+from PyPDF2 import PdfFileMerger
 
 background = cv2.imread('./dist/img/background.png')
 color = 0
@@ -118,7 +119,10 @@ def atoi(text):
 def natural_keys(text):
     return atoi(re.split('(\d+)', text)[1])
 
-print("\nCriando cartões:\n")
+print('\n[1/5] Gerando background:\n')
+os.system('node background.js')
+
+print('\n\n[2/5] Criando cartões:\n')
 for i in tqdm(range(0, length)):
 # Como algumas instituições não entregaram seus dados a tempo, por ora não geraremos cartões delas -- mas é importante
 # que seu id se mantenha
@@ -128,7 +132,7 @@ for i in tqdm(range(0, length)):
 # Precisa ser altamente melhorado isso daqui, mas infelizmente as bibliotecas de pdf que encontrei não facilitam muito
 # o serviço
 # Ao mesmo tempo a complexidade dessa parte do código é 200% desnecessaria
-print("\nExportando em páginas:\n")
+print('\n[3/5] Exportando em páginas:\n')
 imgPath = './dist/img/card/'
 images = [x for x in os.listdir(imgPath) if x.endswith('.png')]
 # Eu sei que é feio, mas é necessário com o tempo curto
@@ -142,16 +146,18 @@ for i in tqdm(range(6, len(images), 6)):
     exportToPDF(counter, images[i-6:i])
     counter += 1
 
-print("\nLinkando as páginas em pdf:\n")
-# O step no range é de seis porque é o número de cartões por página
-#for i in tqdm(range(6, len(images), 6)):
-#    pdf.add_page()
-    # coloquei um x=2, y=2 porque a impressora do ICMC 'comia' um pouco da arte na hora de imprimir
-#    pdf.image(f"./dist/img/page/page-{i}.png", x=2, y=2)
+print('\n[4/5] Salvando as páginas em pdf:\n')
+os.system('ruby pagesToPDF.rb')
+print('\n\n[5/5] Linkando em um único pdf:\n')
 
-# Writing all the collected pages to a file
-#output.write(open("CombinedPages.pdf", "wb"))
+merger = PdfFileMerger()
+pdfs = [x for x in os.listdir('./dist/pdf/') if x.endswith('.pdf')]
+pdfs = sorted(pdfs, key=natural_keys)
 
-print('\nSalvando pdf...\n')
-#pdf.output('cartoes.pdf', 'F')
-print('Programa finalizado\n')
+for pdf in tqdm(pdfs):
+    merger.append(open(f"./dist/pdf/{pdf}", 'rb'))
+
+with open('result.pdf', 'wb') as fout:
+    merger.write(fout)
+
+print('\nPrograma finalizado\n')

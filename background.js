@@ -1,5 +1,9 @@
+'use strict';
+
 const Jimp = require('jimp');
 const fs = require('fs');
+const ProgressBar = require('progress');
+var bar = new ProgressBar(':bar', { total: 6, width: 100 });
 
 const default_cb = (err, res) => {
     if (err)
@@ -40,12 +44,14 @@ const column = new Jimp(1, height, 0x000000FF, default_cb);
 /*  Gera a imagem de fundo padrão que será utilizada para todos os cartões  */
 const background = new Promise((resolve, reject) => {
     new Jimp(width, height, 0xFFFFFFFF, (err, res) => {
+        bar.tick();
         /*  Adiciona o logo */
         return Jimp.read('./src/img/logo.png').then(logo => {
             logo.resize(height, height).opacity(0.2);
             return res.composite(logo, 30, 0);
             /*  Adiciona o cabeçalho    */
         }).then(image => {
+            bar.tick();
             return Jimp.loadFont(font_title).then(font => {
                 return image.print(font, 430, 20, 'SACOLINHAS');
             }).catch(err => {
@@ -53,6 +59,7 @@ const background = new Promise((resolve, reject) => {
             });
             /*  Adiciona as linhas e colunas    */
         }).then(image => {
+            bar.tick();
             return image.composite(line, 0, 290)
                 .composite(line, 0, sixth_row + font_size + 5)
                 .composite(line, 0, tenth_row + font_size + 5)
@@ -63,6 +70,7 @@ const background = new Promise((resolve, reject) => {
                 .composite(column, width - 1, 0);
             /*  Adiciona o texto em regular */
         }).then(image => {
+            bar.tick();
             return Jimp.loadFont(font_regular).then(font => {
                 return image.print(font, 290, first_row, 'Nome:')
                     .print(font, 290, second_row, 'Sexo:')
@@ -93,8 +101,9 @@ const background = new Promise((resolve, reject) => {
                     .print(font, 80, footer + 1.5 * font_size, 'Loja I - Rua General Osório, 827 - Centro - São Carlos/SP - 16 3413-6661')
 
         })
-            /*  Adiciona o texto em negrito */
+        /*  Adiciona o texto em negrito */
         }).then(image => {
+            bar.tick();
             return Jimp.loadFont(font_regular).then(font => {
                 return image.print(font, 420, 290, 'Itens a serem inseridos:')
                     .print(font, 520, sixth_row + font_size + 5, 'Entregas:')
@@ -107,5 +116,6 @@ const background = new Promise((resolve, reject) => {
 });
 
 background.then(result => {
-    result.write('./dist/img/background.png')
+    result.write('./dist/img/background.png');
+    bar.tick();
 });
