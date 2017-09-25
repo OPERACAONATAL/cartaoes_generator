@@ -21,18 +21,19 @@ const first_row = 200,
     fourth_row = third_row + font_size,
     fifth_row = fourth_row + font_size,
     sixth_row = fifth_row + font_size,
-    seventh_row = 500,
+    seventh_row = 515,
     eighth_row = seventh_row + font_size,
-    nineth_row = eighth_row + font_size,
+    nineth_row = eighth_row + 2 * font_size,
     tenth_row = nineth_row + font_size,
-    eleventh_row = 670,
+    eleventh_row = 715,
     twelfth_row = eleventh_row + font_size,
     thirteenth_row = twelfth_row + font_size,
     fourteenth_row = thirteenth_row + font_size,
     fifteenth_row = fourteenth_row + font_size,
-    sixteenth_row = 920,
+    sixteenth_row = 910,
     seventeenth_row = sixteenth_row + font_size,
-    eighteenth_row = seventeenth_row + font_size;
+    eighteenth_row = seventeenth_row + font_size,
+    footer = 1050;
 const line = new Jimp(width, 1, 0x000000FF, default_cb);
 const column = new Jimp(1, height, 0x000000FF, default_cb);
 
@@ -55,7 +56,7 @@ const background = new Promise((resolve, reject) => {
             return image.composite(line, 0, 290)
                 .composite(line, 0, sixth_row + font_size + 5)
                 .composite(line, 0, tenth_row + font_size + 5)
-                .composite(line, 0, fifteenth_row + 100)
+                .composite(line, 0, fifteenth_row + 110)
                 .composite(line, 0, 0)
                 .composite(line, 0, height - 1)
                 .composite(column, 0, 0)
@@ -86,13 +87,18 @@ const background = new Promise((resolve, reject) => {
                     .print(font, first_col, fourteenth_row, '4. Caso seja colocado uma quantidade maior de algum item, ele poderá ser')
                     .print(font, 65, fifteenth_row, 'realocado para outras sacolinhas')
                     .print(font, 235, fifteenth_row+1.5*font_size, 'A Operação Natal agradece a sua participação :)')
-            })
+                    .print(font, 270, sixteenth_row + 1.5 * font_size, 'Desconto na Universo da Moda Kids de São Carlos!')
+                    .print(font, 30, seventeenth_row + 2 * font_size, 'Apresente esse canhoto na loja Universo da Moda Kids e ganhe 15% de desconto')
+                    .print(font, 30, eighteenth_row + 2 * font_size, 'na compra destinada à confecção de sua Sacolinha')
+                    .print(font, 80, footer + 1.5 * font_size, 'Loja I - Rua General Osório, 827 - Centro - São Carlos/SP - 16 3413-6661')
+
+        })
             /*  Adiciona o texto em negrito */
         }).then(image => {
             return Jimp.loadFont(font_regular).then(font => {
-                return image.print(font, 400, 290, 'Itens a serem inseridos:')
-                    .print(font, 460, sixth_row + font_size + 5, 'Entregas:')
-                    .print(font, 450, tenth_row + font_size + 5, 'Observações: ');
+                return image.print(font, 420, 290, 'Itens a serem inseridos:')
+                    .print(font, 520, sixth_row + font_size + 5, 'Entregas:')
+                    .print(font, 500, tenth_row + font_size + 5, 'Observações: ');
             }).catch(err => {
                 throw (err);
             });

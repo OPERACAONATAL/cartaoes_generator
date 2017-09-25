@@ -12,7 +12,6 @@ import pandas as pd
 import copy as cp
 from tqdm import tqdm
 from PIL import Image
-from fpdf import FPDF
 import os
 import math
 import re
@@ -30,8 +29,6 @@ elders = ['Cantinho Fraterno ', 'Helena Dornfeld']
 # Feio mas 'funciona'
 text = ['MESES', 'ANOS', 'ANO', 'MÊS']
 exceptions = ['Cantinho Fraterno ', 'CEMEI Papa João Paulo II', 'ONG Formiga Verde', 'Salesianos']
-
-pdf = FPDF(unit="mm", format='A4')
 
 a4_width = 595
 a4_heigth = 842
@@ -87,7 +84,7 @@ def insertData(id, data):
     # Salva a imagem do cartão
     cv2.imwrite(f"./dist/img/card/OPN-{i}.png", new_background)
 
-def exportToPDF(start, fileNames):
+def exportToPDF(number, fileNames):
     images = [Image.open(f"./dist/img/card/{x}") for x in fileNames]
 
     width, heigth = images[0].size
@@ -112,7 +109,7 @@ def exportToPDF(start, fileNames):
 
     # Verificar como transformar em um buffer
     #page_img = page_img.resize((a4_width, a4_heigth), Image.ANTIALIAS)
-    page_img.save(f"./dist/img/page/page-{start}.png", 'PNG', quality=100, dpi=(300, 300))
+    page_img.save(f"./dist/img/page/page-{number}.png", 'PNG', quality=100, dpi=(300, 300))
     
 def atoi(text):
     return int(text)
@@ -139,17 +136,22 @@ images = [x.split('.')[0] for x in images]
 images = sorted(images, key=natural_keys)
 # Corrigindo agora
 images = [f"{x}.png" for x in images]
+counter = 0
 # O step no range é de seis porque é o número de cartões por página
 for i in tqdm(range(6, len(images), 6)):
-    exportToPDF(i, images[i-6:i])
+    exportToPDF(counter, images[i-6:i])
+    counter += 1
 
 print("\nLinkando as páginas em pdf:\n")
 # O step no range é de seis porque é o número de cartões por página
-for i in tqdm(range(6, len(images), 6)):
-    pdf.add_page()
+#for i in tqdm(range(6, len(images), 6)):
+#    pdf.add_page()
     # coloquei um x=2, y=2 porque a impressora do ICMC 'comia' um pouco da arte na hora de imprimir
-    pdf.image(f"./dist/img/page/page-{i}.png", x=2, y=2)
+#    pdf.image(f"./dist/img/page/page-{i}.png", x=2, y=2)
+
+# Writing all the collected pages to a file
+#output.write(open("CombinedPages.pdf", "wb"))
 
 print('\nSalvando pdf...\n')
-pdf.output('cartoes.pdf', 'F')
+#pdf.output('cartoes.pdf', 'F')
 print('Programa finalizado\n')

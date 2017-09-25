@@ -1,4 +1,4 @@
 src/data/
 node_modules/
 dist/
-cartoes.pdf
+*.pdf
