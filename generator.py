@@ -109,15 +109,11 @@ def exportToPDF(number, fileNames):
         y_offset += heigth
 
     # Verificar como transformar em um buffer
-    #page_img = page_img.resize((a4_width, a4_heigth), Image.ANTIALIAS)
     page_img.save(f"./dist/img/page/page-{number}.png", 'PNG', quality=100, dpi=(300, 300))
     
-def atoi(text):
-    return int(text)
-
 # https://stackoverflow.com/a/5967539/7092954
 def natural_keys(text):
-    return atoi(re.split('(\d+)', text)[1])
+    return int(re.split('(\d+)', text)[1])
 
 print('\n[1/5] Gerando background:\n')
 os.system('node background.js')
