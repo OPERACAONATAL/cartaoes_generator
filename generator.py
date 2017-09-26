@@ -5,6 +5,7 @@
       descobrir como salvar em pdf pelo próprio OpenCV
     * Verificar as questões de resolução de cartões para as páginas de impressão
     * Gerar o background por essse programa e não o implementado em Node.js -- não é prioridade
+    * Migrar tudo para Ruby
 """
 import pyqrcode
 import cv2
@@ -29,7 +30,6 @@ crop = 20
 elders = ['Cantinho Fraterno ', 'Helena Dornfeld']
 # Feio mas 'funciona'
 text = ['MESES', 'ANOS', 'ANO', 'MÊS']
-exceptions = ['Cantinho Fraterno ', 'CEMEI Papa João Paulo II', 'ONG Formiga Verde', 'Salesianos']
 
 a4_width = 595
 a4_heigth = 842
@@ -37,9 +37,14 @@ a4_heigth = 842
 df = pd.read_csv('./src/data/data.csv')
 length = df.shape[0]
 
+
 def removeAccent(src):
-    # Por algum motivo em alguns casos em específico há geração de '?' nas strings, por isso o replace
-    return unidecode.unidecode(str(src)).replace('?', '')
+    # Verifica também se é "nan" senão retorna em branco
+    if isinstance(src, float) and math.isnan(src):
+        return ''
+    else:
+        # Por algum motivo em alguns casos em específico há geração de '?' nas strings, por isso o replace
+        return unidecode.unidecode(str(src)).replace('?', '')
 
 def insertData(id, data):
     # Sei que isso é feio, mas não sei como salvar o qr em um buffer pro opencv ler
@@ -85,6 +90,20 @@ def insertData(id, data):
     # Salva a imagem do cartão
     cv2.imwrite(f"./dist/img/card/OPN-{i}.png", new_background)
 
+def insertDummy(id):
+    qr = pyqrcode.create(f"OPN-{id}")
+    qr.png(f"./dist/img/qrcode/id-{id}.png", scale=10)
+
+    qrcode = cv2.imread(f"./dist/img/qrcode/id-{id}.png")
+    qrcode = qrcode[crop: qrcode.shape[0], crop: qrcode.shape[1]]
+
+    new_background = cp.deepcopy(background)
+    new_background[y_offset:qrcode.shape[0] + y_offset, x_offset:qrcode.shape[1] + x_offset] = qrcode
+    
+    cv2.putText(new_background, f"ID:{id}", (25, 280), font, 1.5, color, thickness=thick)
+
+    cv2.imwrite(f"./dist/img/card/OPN-{i}.png", new_background)
+
 def exportToPDF(number, fileNames):
     images = [Image.open(f"./dist/img/card/{x}") for x in fileNames]
 
@@ -93,9 +112,11 @@ def exportToPDF(number, fileNames):
     page_width = 2 * width
     page_heigth = 3 * heigth
 
-    page_img = Image.new('RGB', (page_width, page_heigth), (255, 255, 255))
-    x_offset = 0
-    y_offset = 0
+    # mais 20 nas dimensões porque é uma borda que a impressora não imprime em A4
+    border = 20
+    page_img = Image.new('RGB', (page_width+2*border, page_heigth+2*border), (255, 255, 255))
+    x_offset = border
+    y_offset = border
 
     for j in range(0, len(images), 2):
         k = j
@@ -105,7 +126,7 @@ def exportToPDF(number, fileNames):
                 page_img.paste(images[k], (x_offset, y_offset))
                 x_offset += width
                 k += 1
-        x_offset = 0
+        x_offset = border
         y_offset += heigth
 
     # Verificar como transformar em um buffer
@@ -115,20 +136,22 @@ def exportToPDF(number, fileNames):
 def natural_keys(text):
     return int(re.split('(\d+)', text)[1])
 
-print('\n[1/5] Gerando background:\n')
-os.system('node background.js')
+print('\n[1/6] Gerando background:\n')
+#os.system('node background.js')
 
-print('\n\n[2/5] Criando cartões:\n')
-for i in tqdm(range(0, length)):
-# Como algumas instituições não entregaram seus dados a tempo, por ora não geraremos cartões delas -- mas é importante
-# que seu id se mantenha
-    if not df.ix[i]['Nome da Instituição'] in exceptions:
-         insertData(i, df.ix[i])
+print('\n\n[2/6] Criando cartões:\n')
+#for i in tqdm(range(0, length)):
+#    insertData(i, df.ix[i])
+
+print('\n[3/6] Criando cartões adicionais em branco:\n')
+# Mitiue pediu para gerar dez cartões a mais
+#for i in tqdm(range(length, length+10)):
+#    insertDummy(i)
 
 # Precisa ser altamente melhorado isso daqui, mas infelizmente as bibliotecas de pdf que encontrei não facilitam muito
 # o serviço
 # Ao mesmo tempo a complexidade dessa parte do código é 200% desnecessaria
-print('\n[3/5] Exportando em páginas:\n')
+print('\n[4/6] Exportando em páginas:\n')
 imgPath = './dist/img/card/'
 images = [x for x in os.listdir(imgPath) if x.endswith('.png')]
 # Eu sei que é feio, mas é necessário com o tempo curto
@@ -142,18 +165,18 @@ for i in tqdm(range(6, len(images), 6)):
     exportToPDF(counter, images[i-6:i])
     counter += 1
 
-print('\n[4/5] Salvando as páginas em pdf:\n')
-os.system('ruby pagesToPDF.rb')
-print('\n\n[5/5] Linkando em um único pdf:\n')
+print('\n[5/6] Salvando as páginas em pdf:\n')
+#os.system('ruby pagesToPDF.rb')
+print('\n\n[6/6] Linkando em um único pdf:\n')
 
 merger = PdfFileMerger()
 pdfs = [x for x in os.listdir('./dist/pdf/') if x.endswith('.pdf')]
 pdfs = sorted(pdfs, key=natural_keys)
 
-for pdf in tqdm(pdfs):
-    merger.append(open(f"./dist/pdf/{pdf}", 'rb'))
+#for pdf in tqdm(pdfs):
+#    merger.append(open(f"./dist/pdf/{pdf}", 'rb'))
 
-with open('result.pdf', 'wb') as fout:
-    merger.write(fout)
+#with open('result.pdf', 'wb') as fout:
+#    merger.write(fout)
 
 print('\nPrograma finalizado\n')
