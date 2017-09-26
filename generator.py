@@ -112,11 +112,17 @@ def exportToPDF(number, fileNames):
     page_width = 2 * width
     page_heigth = 3 * heigth
 
+    #width_border_proportion = 1
+    #heigth_border_proportion = page_heigth/page_width
+
     # mais 20 nas dimensões porque é uma borda que a impressora não imprime em A4
-    border = 20
-    page_img = Image.new('RGB', (page_width+2*border, page_heigth+2*border), (255, 255, 255))
-    x_offset = border
-    y_offset = border
+    border = 30
+
+    #width_border = math.ceil(width_border_proportion * border)
+    #heigth_border = math.ceil(heigth_border_proportion * border)
+    page_img = Image.new('RGB', (page_width, page_heigth), (255, 255, 255))
+    x_offset = 0
+    y_offset = 0
 
     for j in range(0, len(images), 2):
         k = j
@@ -126,7 +132,7 @@ def exportToPDF(number, fileNames):
                 page_img.paste(images[k], (x_offset, y_offset))
                 x_offset += width
                 k += 1
-        x_offset = border
+        x_offset = 0
         y_offset += heigth
 
     # Verificar como transformar em um buffer
