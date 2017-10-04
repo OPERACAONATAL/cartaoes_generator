@@ -37,7 +37,6 @@ a4_heigth = 842
 df = pd.read_csv('./src/data/data.csv')
 length = df.shape[0]
 
-
 def removeAccent(src):
     # Verifica também se é "nan" senão retorna em branco
     if isinstance(src, float) and math.isnan(src):
@@ -142,14 +141,14 @@ def exportToPDF(number, fileNames):
 def natural_keys(text):
     return int(re.split('(\d+)', text)[1])
 
-print('\n[1/6] Gerando background:\n')
+print('\n[1/7] Gerando background:\n')
 #os.system('node background.js')
 
-print('\n\n[2/6] Criando cartões:\n')
+print('\n\n[2/7] Criando cartões:\n')
 #for i in tqdm(range(0, length)):
 #    insertData(i, df.ix[i])
 
-print('\n[3/6] Criando cartões adicionais em branco:\n')
+print('\n[3/7] Criando cartões adicionais em branco:\n')
 # Mitiue pediu para gerar dez cartões a mais
 #for i in tqdm(range(length, length+10)):
 #    insertDummy(i)
@@ -157,7 +156,7 @@ print('\n[3/6] Criando cartões adicionais em branco:\n')
 # Precisa ser altamente melhorado isso daqui, mas infelizmente as bibliotecas de pdf que encontrei não facilitam muito
 # o serviço
 # Ao mesmo tempo a complexidade dessa parte do código é 200% desnecessaria
-print('\n[4/6] Exportando em páginas:\n')
+print('\n[4/7] Exportando em páginas:\n')
 imgPath = './dist/img/card/'
 images = [x for x in os.listdir(imgPath) if x.endswith('.png')]
 # Eu sei que é feio, mas é necessário com o tempo curto
@@ -167,13 +166,13 @@ images = sorted(images, key=natural_keys)
 images = [f"{x}.png" for x in images]
 counter = 0
 # O step no range é de seis porque é o número de cartões por página
-for i in tqdm(range(6, len(images), 6)):
-    exportToPDF(counter, images[i-6:i])
-    counter += 1
+#for i in tqdm(range(6, len(images), 6)):
+#    exportToPDF(counter, images[i-6:i])
+#    counter += 1
 
-print('\n[5/6] Salvando as páginas em pdf:\n')
+print('\n[5/7] Salvando as páginas em pdf:\n')
 #os.system('ruby pagesToPDF.rb')
-print('\n\n[6/6] Linkando em um único pdf:\n')
+print('\n\n[6/7] Linkando em um único pdf:\n')
 
 merger = PdfFileMerger()
 pdfs = [x for x in os.listdir('./dist/pdf/') if x.endswith('.pdf')]
@@ -185,4 +184,6 @@ pdfs = sorted(pdfs, key=natural_keys)
 #with open('result.pdf', 'wb') as fout:
 #    merger.write(fout)
 
+print('\n[7/7]Injetando id na planilha antes de finalizar.\n')
+df.to_csv('./dist/data/data_with_index.csv', index_label='ID')
 print('\nPrograma finalizado\n')
